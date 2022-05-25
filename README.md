@@ -19,3 +19,6 @@
 
 4. Execute by cmd:
    Example: py .\example\variable.py
+
+5. Handle Errors and Exceptions:
+   https://docs.python.org/3/tutorial/errors.html
