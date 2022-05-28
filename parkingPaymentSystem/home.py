@@ -1,8 +1,10 @@
 from parking_lot import Car, Park
 from datetime import datetime
 
+
 def welcome():
-    print("""Welcome to Console parking payment system""")
+    print("""Welcome to Console Parking Payment System""")
+
 
 def startSystem():
     try:
@@ -17,38 +19,82 @@ def startSystem():
             raise ValueError("Not a positive number")
         else:
             if input_option == 1:
-                # Todo import Park class
+
+                # Check valid format like 59C-12345, 01E-00001.
+                car_identity = checkCarIdentityValidate()
+                frequent_parking_number = int(
+                    input("The frequent parking number(optional): "))
+
                 dt = datetime.now()
-                dt_format = dt.strftime("%Y-%m-%d, %H:%M:%S")
-                arrival_time = input("The arrival time: {}".format(dt_format)) or dt_format
+                dt_date = dt.strftime("%Y-%m-%d")
+                dt_time = dt.strftime("%H:%M")
+                print("The arrival time: {}, {}".format(dt_date, dt_time))
+                parking_entity = Park(
+                    car_identity,
+                    dt_date,
+                    dt_time,
+                    frequent_parking_number
+                )
 
-                # Todo: Check valid format like 59C-12345, 01E-00001.
-                car_identity = input("Car identity: ")
-                car = Car(car_identity)
-                isValid = car.validate_car_identity()
-
-                if isValid is None:
-                    print("Your car identity is not format correctly! Please re-input again")
-                    car_identity = input("Car identity: ")
-
-                frequent_parking_number = int(input("The frequent parking number(optional): "))
-                parking_entity = Park(car_identity, arrival_time, frequent_parking_number)
                 saved_park = parking_entity.save_details_as_file()
+                if saved_park:
+                    print('The detail updated succeessfully!')
+                else:
+                    startSystem()
 
                 # Finished ! go to main menu
                 startSystem()
-
             elif input_option == 2:
-                input("The frequent parking number(optional): ")
+                # Todo: Check valid format like 59C-12345, 01E-00001.
+                car_identity = checkCarIdentityValidate()
+                car = Car(car_identity)
+                current_car = car.find()
+                if current_car is None:
+                    raise ValueError(
+                        "Not valid car identity found! Please try again")
+                else:
+                    print(current_car)
             elif input_option == 3:
-                input("The frequent parking number(optional): ")
+                # Todo: Check valid format like 59C-12345, 01E-00001.
+                car_identity = checkCarIdentityValidate()
+                car = Car(car_identity)
+                current_car = car.find()
+                if current_car is None:
+                    raise ValueError(
+                        "Not valid car identity found! Please try again")
+                else:
+                    print(current_car)
+
+                    
             else:
                 print("Your option is invalid, please try again.")
                 typeAgain()
     except Exception as e:
-        print("Error:", e) # This option show only for dev
+        print("Error:", e)  # This option show only for dev
         print("Oops! That was no valid number. Try again...")
         typeAgain()
+
+# Todo: create new common fucntion to turn back input and check validate too
+
+
+def checkCarIdentityValidate():
+    car_identity = input("Car identity: ")
+    car = Car(car_identity)
+    isValid = car.validate_car_identity()
+    if isValid is None:
+        option = input("""
+                        Your car identity is not format correctly!
+                        Do you want to try again?
+                        Please type Y for YES or N for No.
+                    """)
+
+        if option.upper() == 'Y':
+            checkCarIdentityValidate()
+        else:
+            startSystem()
+    else:
+        return car_identity
+
 
 def typeAgain():
     type_again = input("""
@@ -63,6 +109,7 @@ def typeAgain():
         quit()
     else:
         typeAgain()
+
 
 welcome()
 startSystem()

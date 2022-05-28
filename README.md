@@ -22,3 +22,6 @@
 
 5. Handle Errors and Exceptions:
    https://docs.python.org/3/tutorial/errors.html
+
+6. Python OOPs Concepts
+https://www.geeksforgeeks.org/python-oops-concepts/
