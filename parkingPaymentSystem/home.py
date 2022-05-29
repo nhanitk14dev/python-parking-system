@@ -1,4 +1,5 @@
-from parking_lot import Car, Park
+from multiprocessing.sharedctypes import Value
+from parking_lot import Car, Park, History
 from datetime import datetime
 
 
@@ -13,6 +14,7 @@ def startSystem():
            1. Park (in)
            2. Pickup (out)
            3. History
+           ---Press any key to exit system---
            """))
 
         if not isinstance(input_option, int):
@@ -23,7 +25,7 @@ def startSystem():
                 # Check valid format like 59C-12345, 01E-00001.
                 car_identity = checkCarIdentityValidate()
                 frequent_parking_number = int(
-                    input("The frequent parking number(optional): "))
+                    input("The frequent parking number(optional): ") or 0) 
 
                 dt = datetime.now()
                 dt_date = dt.strftime("%Y-%m-%d")
@@ -36,13 +38,8 @@ def startSystem():
                     frequent_parking_number
                 )
 
-                saved_park = parking_entity.save_details_as_file()
-                if saved_park:
-                    print('The detail updated succeessfully!')
-                else:
-                    startSystem()
-
-                # Finished ! go to main menu
+                parking_entity.save_details_as_file()
+                print('The detail updated succeessfully!')
                 startSystem()
             elif input_option == 2:
                 # Todo: Check valid format like 59C-12345, 01E-00001.
@@ -54,18 +51,19 @@ def startSystem():
                         "Not valid car identity found! Please try again")
                 else:
                     print(current_car)
+                startSystem()
             elif input_option == 3:
                 # Todo: Check valid format like 59C-12345, 01E-00001.
                 car_identity = checkCarIdentityValidate()
-                car = Car(car_identity)
-                current_car = car.find()
-                if current_car is None:
+                car_history_model = History(car_identity)
+                car_history_data = car_history_model.find()
+                if car_history_data is None:
                     raise ValueError(
                         "Not valid car identity found! Please try again")
                 else:
-                    print(current_car)
-
-                    
+                    car_history_model.exportHistory(car_history_data)
+                    print('a file have been exported')
+                startSystem()    
             else:
                 print("Your option is invalid, please try again.")
                 typeAgain()
@@ -82,9 +80,8 @@ def checkCarIdentityValidate():
     car = Car(car_identity)
     isValid = car.validate_car_identity()
     if isValid is None:
-        option = input("""
-                        Your car identity is not format correctly!
-                        Do you want to try again?
+        print("Oops! Your car identity is not format correctly!")
+        option = input("""Do you want to try again?
                         Please type Y for YES or N for No.
                     """)
 

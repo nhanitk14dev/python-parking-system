@@ -6,6 +6,7 @@ import re  # https://www.w3schools.com/python/python_regex.asp OR https://www.co
 import json
 from os.path import exists
 import os.path
+from zoneinfo import available_timezones
 
 # parent class
 
@@ -57,8 +58,11 @@ class Car:
                 with open(filename, mode='w') as f:
                     json.dump(data, f)
                     f.close()
+            
+            return True
         except Exception as e:
             print("Error: ", e)
+            return False
 
 # Child class
 
@@ -86,15 +90,53 @@ class Park(Car):
             'FrequentParkingNumber': self.frequent_parking_number
         }
 
-        self.write_json(dict_details)
+        return self.write_json(dict_details)
 
 
-# Test Data
-# a = Park('84E-12313', '2022-05-05 13:01', '111111111')
+class History(Car):
+    def __init__(self, car_identity):
+        super().__init__(car_identity)
+
+    def exportHistory(self, car_details):
+        
+        if len(car_details['details']):
+            try:
+                filename = "{}.txt".format(self.car_identity)
+                with open(filename, mode="w") as f:
+                    total_payment = 0.00
+                    formatted_total_payment = "{:.2f}".format(total_payment)
+
+                    available_credit = 0.00
+                    formatted_available_credit = "{:.2f}".format(available_credit)
+
+                    f.write("Total payment: {}\n".format(formatted_total_payment))
+                    f.write("Available credit: {}\n".format(formatted_available_credit))
+                    f.write("Parked Date:\n")
+                    for i in car_details['details']:
+                        f.write("{}-{}\n".format(i['ArrivalDate'], i['ArrivalTime']))
+                    f.close()
+
+            except Exception as e:
+                print("Erro: ", e)
+        else:
+            print("No content")
+
+
+    
+# Test Data Step 1.
+# a = Park('84E-12345', '2022-05-05 13:01', '111111111')
 # a.details()
 # a.save_details_as_file()
-# a = Park('84D-11111', '2022-28-05', '14:01', '444412313')
+
+# Test Data Step 2:
+# a = Park('84E-12345', '2022-28-05', '14:01', '444412313')
 # a.save_details_as_file()
+
+# Test Data Step 3:
+# car_identity = "84E-12345"
+# car_history_model = History(car_identity)
+# car_history_data = car_history_model.find()
+# car_history_model.exportHistory(car_history_data)
 
 # json.loads(jsonstring) #for Json string
 # json.loads(fileobject.read()) #for fileobject
@@ -102,7 +144,7 @@ class Park(Car):
 # Data example:
 # [
 #     {
-#         "CarIdentity": "84E-12313",
+#         "CarIdentity": "84E-12345",
 #         "ArrivalDate": "2022-05-05",
 #         "ArrivalTime": "13:01",
 #         "FrequentParkingNumber": "111111111",
@@ -110,9 +152,9 @@ class Park(Car):
 #         "pickup": 0
 #     },
 #     {
-#         "CarIdentity": "84E-12313",
+#         "CarIdentity": "84E-12345",
 #         "ArrivalDate": "2022-05-05",
-#         "ArrivalTime": "13:01",
+#         "ArrivalTime": "13:03",
 #         "FrequentParkingNumber": "111111111",
 #         "park": 0,
 #         "pickup": 0

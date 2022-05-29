@@ -10,10 +10,7 @@
 
   Active stript: $ > venv/python-39/Scripts/activate.
 
-  !importan: the terminal on VSCODE, PHPstorm maybe can't run this cmd. We should re-open terminal or use another terminal.
-
 3. Install and Export Package:
-
   - Can follow: https://note.nkmk.me/en/python-pip-install-requirements
   - Use cmd: pip -r requirements.txt or pip freeze > requirements.txt
 
@@ -25,3 +22,10 @@
 
 6. Python OOPs Concepts
 https://www.geeksforgeeks.org/python-oops-concepts/
+
+7. Python handle file
+   https://www.w3schools.com/python/python_file_handling.asp
+   - "r" - Read - Default value. Opens a file for reading, error if the file does not exist
+   - "a" - Append - Opens a file for appending, creates the file if it does not exist
+   - "w" - Write - Opens a file for writing, creates the file if it does not exist
+   - "x" - Create - Creates the specified file, returns an error if the file exists 
