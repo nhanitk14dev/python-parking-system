@@ -29,3 +29,6 @@ https://www.geeksforgeeks.org/python-oops-concepts/
    - "a" - Append - Opens a file for appending, creates the file if it does not exist
    - "w" - Write - Opens a file for writing, creates the file if it does not exist
    - "x" - Create - Creates the specified file, returns an error if the file exists 
+
+8. Format Float 
+  - https://appdividend.com/2021/03/31/how-to-format-float-values-in-python

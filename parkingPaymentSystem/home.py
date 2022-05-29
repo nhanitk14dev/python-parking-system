@@ -38,7 +38,7 @@ def startSystem():
                     frequent_parking_number
                 )
 
-                parking_entity.save_details_as_file()
+                parking_entity.save_details_as_file(True)
                 print('The detail updated succeessfully!')
                 startSystem()
             elif input_option == 2:
@@ -50,7 +50,23 @@ def startSystem():
                     raise ValueError(
                         "Not valid car identity found! Please try again")
                 else:
-                    print(current_car)
+                    # print(current_car)
+                    dt = datetime.now()
+                    dt_date = dt.strftime("%Y-%m-%d")
+                    dt_time = dt.strftime("%H:%M")
+                    #frequent_parking_number todo: get existing value
+                    parking_model = Park(
+                        car_identity,
+                        dt_date,
+                        dt_time
+                    )
+                    parking_model.save_details_as_file(False)
+                    print('The detail updated succeessfully!')
+
+                    """Sytem calculate and show the parking price"""
+                    parking_price_detail = parking_model.calculate_display_parking_price()
+
+
                 startSystem()
             elif input_option == 3:
                 # Todo: Check valid format like 59C-12345, 01E-00001.

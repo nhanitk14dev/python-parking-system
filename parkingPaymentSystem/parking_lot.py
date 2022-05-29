@@ -1,16 +1,13 @@
 # OOP https://www.geeksforgeeks.org/python-oops-concepts
 from array import array
-from cgi import print_arguments
-from operator import le
 import re  # https://www.w3schools.com/python/python_regex.asp OR https://www.codespeedy.com/regex-in-python
 import json
 from os.path import exists
 import os.path
-from zoneinfo import available_timezones
+from datetime import datetime
+from common_function import caculate_duration_time_from_parked_to_pickup_time, calculate_parking_cost
 
 # parent class
-
-
 class Car:
     def __init__(self, car_identity):
         self.car_identity = car_identity
@@ -80,17 +77,55 @@ class Park(Car):
         self.arrival_time = arrival_time
         self.frequent_parking_number = frequent_parking_number
 
-    def save_details_as_file(self):
+    def save_details_as_file(self, is_parked: True, is_active: False):
 
         # Todo: check car if it's existing, update new data, else new record
         dict_details = {
             'CarIdentity': self.car_identity,
             'ArrivalDate': self.arrival_date,
             'ArrivalTime': self.arrival_time,
-            'FrequentParkingNumber': self.frequent_parking_number
+            'FrequentParkingNumber': self.frequent_parking_number,
+            'Parked': is_parked,
+            'PickedUp': not is_parked,
+            'Active': is_active
         }
 
         return self.write_json(dict_details)
+
+    def calculate_parking_price(self, car_details):
+        try:
+            # Todo in the future: Handle get price by day of week. Currently, just calculate in day.
+            # Times: from 08:00 - midnight (00:00)
+            # Price default: $10.00 per hour (all days are the same)
+            # Discount 50% from 17:00 - midnight, 10% for other arrival time.
+
+            price_default = float(10.00)
+            # Filter item is active
+            if len(car_details['details']):
+                active_parked_car = list(filter(lambda item: item['Active'] is True, car_details['details']))
+                car_details = active_parked_car[0]
+
+                picked_time = "{} {}".format(car_details['ArrivalDate'], car_details['ArrivalTime'])
+                dt = datetime.now()
+                current_time = dt.strftime("%Y-%m-%d %H:%M")
+
+                total_hours = caculate_duration_time_from_parked_to_pickup_time(picked_time)
+                total_cost = calculate_parking_cost(total_hours)
+
+                # Print Bill Information
+                bill_info = """
+                    --- Bill Detail ---\n
+                    Car Identity: {}\n
+                    Parked Time: {}\n
+                    Picked Up Time: {}\n
+                    Total Hours: {}\n
+                    Total Cost: {}\n
+                """.format(car_details['CarIdentity'], picked_time, current_time, total_hours, total_cost)
+
+                print(bill_info)
+
+        except Exception as e:
+            print("Error: ", e)
 
 
 class History(Car):
@@ -121,22 +156,30 @@ class History(Car):
         else:
             print("No content")
 
+# try:
+    # Test Data Step 1.
+    # model = Park('84E-12345', '2022-05-29', '14:00', '12345')
+    # model.save_details_as_file(True)
 
-    
-# Test Data Step 1.
-# a = Park('84E-12345', '2022-05-05 13:01', '111111111')
-# a.details()
-# a.save_details_as_file()
+    # Test Data Step 2
+    # model = Park('84E-12345', '2022-05-29', '14:00', '12345')
+    # model.save_details_as_file(False)
 
-# Test Data Step 2:
-# a = Park('84E-12345', '2022-28-05', '14:01', '444412313')
-# a.save_details_as_file()
 
-# Test Data Step 3:
-# car_identity = "84E-12345"
-# car_history_model = History(car_identity)
-# car_history_data = car_history_model.find()
-# car_history_model.exportHistory(car_history_data)
+    # Test calculate parking price
+    park_model = Park('84E-12345')
+    car_details = park_model.find()
+    park_model.calculate_parking_price(car_details)
+
+
+    # Test Data Step 3
+    # car_identity = "84E-12345"
+    # car_history_model = History(car_identity)
+    # car_history_data = car_history_model.find()
+    # car_history_model.exportHistory(car_history_data)
+
+# except Exception as e:
+#     print("Erorr: ", e)
 
 # json.loads(jsonstring) #for Json string
 # json.loads(fileobject.read()) #for fileobject
