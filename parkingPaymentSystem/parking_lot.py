@@ -1,10 +1,12 @@
 # OOP https://www.geeksforgeeks.org/python-oops-concepts
 from array import array
+from math import fabs
 import re  # https://www.w3schools.com/python/python_regex.asp OR https://www.codespeedy.com/regex-in-python
 import json
 from os.path import exists
 import os.path
 from datetime import datetime
+from zoneinfo import available_timezones
 from common_function import caculate_duration_time_from_parked_to_pickup_time, calculate_parking_cost
 
 # parent class
@@ -34,28 +36,42 @@ class Car:
             print("Error: ", e)
 
     # function to add to JSON
-    def write_json(self, new_data):
+    def write_json(self, new_details, payment):
         try:
             filename = "{}.json".format(self.car_identity)
             file_exists = os.path.exists(filename)
             if file_exists:
                 with open(filename, mode='r+') as f:
                     data = json.load(f)
-                    data['details'].append(new_data)
+
+                    # If new detail is pickedup
+                    # set another active is false, pickup is false before update
+                    if (len(data['details']) and new_details['PickedUp']):
+                        for i in data['details']:
+                            i['Active'] = False
+                            i['PickedUp'] = False
+                            i['Parked'] = False
+
+                    # Append new
+                    data['details'].append(new_details)
+                    data['TotalPayment'] = payment['TotalPayment']
+                    data['AvailableCredit'] = payment['AvailableCredit']
                     # Again set the pointer to the beginning, replace new content
                     f.seek(0)
                     json.dump(data, f)
                     f.close()
             else:
                 details = []
-                details.append(new_data)
+                details.append(new_details)
                 data = {'details': []}
                 data['details'] = details
+                data['TotalPayment'] = payment['TotalPayment']
+                data['AvailableCredit'] = payment['AvailableCredit']
 
                 with open(filename, mode='w') as f:
                     json.dump(data, f)
                     f.close()
-            
+
             return True
         except Exception as e:
             print("Error: ", e)
@@ -77,7 +93,8 @@ class Park(Car):
         self.arrival_time = arrival_time
         self.frequent_parking_number = frequent_parking_number
 
-    def save_details_as_file(self, is_parked: True, is_active: False):
+    # using None as value of default parameter
+    def save_details_as_file(self, is_parked= True, is_active = False, payment = {}):
 
         # Todo: check car if it's existing, update new data, else new record
         dict_details = {
@@ -90,9 +107,17 @@ class Park(Car):
             'Active': is_active
         }
 
-        return self.write_json(dict_details)
+        if payment:
+            new_payment = payment
+        else:
+            new_payment = {
+                "TotalPayment": "{:.2f}".format(float(0.00)),
+                "AvailableCredit": "{:.2f}".format(float(0.00)),
+            }
 
-    def calculate_parking_price(self, car_details):
+        return self.write_json(dict_details, new_payment)
+
+    def calculate_display_parking_price(self, car_details):
         try:
             # Todo in the future: Handle get price by day of week. Currently, just calculate in day.
             # Times: from 08:00 - midnight (00:00)
@@ -112,17 +137,13 @@ class Park(Car):
                 total_hours = caculate_duration_time_from_parked_to_pickup_time(picked_time)
                 total_cost = calculate_parking_cost(total_hours)
 
-                # Print Bill Information
-                bill_info = """
-                    --- Bill Detail ---\n
-                    Car Identity: {}\n
-                    Parked Time: {}\n
-                    Picked Up Time: {}\n
-                    Total Hours: {}\n
-                    Total Cost: {}\n
-                """.format(car_details['CarIdentity'], picked_time, current_time, total_hours, total_cost)
-
-                print(bill_info)
+                return {
+                    'car_details': car_details,
+                    'picked_time': picked_time,
+                    'current_time': current_time,
+                    'total_hours': total_hours,
+                    'total_cost': total_cost
+                }
 
         except Exception as e:
             print("Error: ", e)
@@ -138,17 +159,14 @@ class History(Car):
             try:
                 filename = "{}.txt".format(self.car_identity)
                 with open(filename, mode="w") as f:
-                    total_payment = 0.00
-                    formatted_total_payment = "{:.2f}".format(total_payment)
+                    total_payment = "{:.2f}".format(float(car_details['TotalPayment']))
+                    available_credit = "{:.2f}".format(float(car_details['AvailableCredit']))
 
-                    available_credit = 0.00
-                    formatted_available_credit = "{:.2f}".format(available_credit)
-
-                    f.write("Total payment: {}\n".format(formatted_total_payment))
-                    f.write("Available credit: {}\n".format(formatted_available_credit))
-                    f.write("Parked Date:\n")
+                    f.write("Total payment: {}\n".format(total_payment))
+                    f.write("Available credit: {}\n".format(available_credit))
+                    f.write("Parked Dates:\n")
                     for i in car_details['details']:
-                        f.write("{}-{}\n".format(i['ArrivalDate'], i['ArrivalTime']))
+                        f.write("{} {}\n".format(i['ArrivalDate'], i['ArrivalTime']))
                     f.close()
 
             except Exception as e:
@@ -163,13 +181,13 @@ class History(Car):
 
     # Test Data Step 2
     # model = Park('84E-12345', '2022-05-29', '14:00', '12345')
-    # model.save_details_as_file(False)
+    # model.save_details_as_file(False, False)
 
 
     # Test calculate parking price
-    park_model = Park('84E-12345')
-    car_details = park_model.find()
-    park_model.calculate_parking_price(car_details)
+    # park_model = Park('84E-12345')
+    # car_details = park_model.find()
+    # park_model.calculate_parking_price(car_details)
 
 
     # Test Data Step 3

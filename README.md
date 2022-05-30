@@ -16,6 +16,7 @@
 
 4. Execute by cmd:
    Example: py .\example\variable.py
+   To start this system: py .\parkingPaymentSystem\home.py
 
 5. Handle Errors and Exceptions:
    https://docs.python.org/3/tutorial/errors.html

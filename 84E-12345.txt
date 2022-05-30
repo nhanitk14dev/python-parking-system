@@ -1,5 +1,5 @@
-Total payment: 0.00
-Available credit: 0.00
-Parked Date:
-2022-05-29-13:01
-2022-05-29-14:00
+Total payment: 30.50
+Available credit: 169.50
+Parked Dates:
+2022-05-30 10:14
+2022-05-30 13:17
